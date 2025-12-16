@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhishGuard AI – Enterprise Phishing Detection</title>
+
+  <!-- Inter Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", Roboto, Arial, sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: #0f172a;
+      min-height: 100vh;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    header {
+      background: transparent;
+      color: white;
+      padding: 60px 40px 80px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    .shield-icon {
+      font-size: 64px;
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 10px 30px rgba(59, 130, 246, 0.5));
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #ffffff 0%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      margin-top: 16px;
+      color: #cbd5e1;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .stats {
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 32px;
+      font-weight: 700;
+      color: #3b82f6;
+      display: block;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: -40px auto 0;
+      padding: 0 20px;
+    }
+
+    .search-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    input {
+      flex: 1;
+      padding: 16px 20px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+      outline: none;
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    input:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59,130,246,.1);
+      transform: translateY(-2px);
+    }
+
+    input.error {
+      border-color: #ef4444;
+      box-shadow: 0 0 0 4px rgba(239,68,68,.1);
+    }
+
+    .hint {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: -8px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      padding: 16px 32px;
+      font-size: 15px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    }
+
+    button:hover { 
+      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    button:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .examples {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .example-chip {
+      padding: 8px 14px;
+      background: #f1f5f9;
+      border-radius: 8px;
+      font-size: 12px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid #e2e8f0;
+    }
+
+    .example-chip:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .result { 
+      margin-top: 40px;
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .result-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 6px;
+      height: 100%;
+    }
+
+    .result-card.safe::before { background: #16a34a; }
+    .result-card.suspicious::before { background: #f59e0b; }
+    .result-card.phishing::before { background: #dc2626; }
+
+    .verdict-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 12px;
+    }
+
+    .verdict-icon {
+      font-size: 48px;
+    }
+
+    .verdict {
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .verdict.safe { color: #16a34a; }
+    .verdict.suspicious { color: #f59e0b; }
+    .verdict.phishing { color: #dc2626; }
+
+    .sub {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #475569;
+      margin-bottom: 24px;
+      word-break: break-all;
+      padding: 12px;
+      background: #f8fafc;
+      border-radius: 8px;
+    }
+
+    .score-wrap { 
+      margin: 24px 0 32px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border-radius: 12px;
+    }
+
+    .score-text {
+      font-size: 15px;
+      margin-bottom: 12px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    .bar {
+      height: 16px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 1s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+      animation: scan 2s infinite;
+    }
+
+    .fill.safe { background: linear-gradient(90deg, #22c55e 0%, #16a34a 100%); }
+    .fill.suspicious { background: linear-gradient(90deg, #fbbf24 0%, #f59e0b 100%); }
+    .fill.phishing { background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%); }
+
+    .score-labels {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    h4 { 
+      margin: 24px 0 12px; 
+      font-size: 17px;
+      color: #1e293b;
+      font-weight: 600;
+    }
+
+    ul { 
+      padding-left: 20px; 
+      margin: 0;
+      list-style: none;
+    }
+
+    li {
+      font-size: 14px;
+      margin-bottom: 10px;
+      color: #475569;
+      padding-left: 24px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    li::before {
+      content: '●';
+      position: absolute;
+      left: 0;
+      color: #94a3b8;
+    }
+
+    .actions {
+      margin-top: 28px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #475569;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+    }
+
+    .action-btn:hover {
+      background: #e2e8f0;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .loading {
+      font-style: normal;
+      color: #64748b;
+      margin-top: 20px;
+      text-align: center;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .loading-icon {
+      font-size: 48px;
+      display: inline-block;
+      animation: pulse 1.5s ease-in-out infinite;
+      margin-bottom: 12px;
+    }
+
+    .trust-section {
+      margin: 60px auto;
+      max-width: 1000px;
+      padding: 0 20px;
+      color: white;
+    }
+
+    .trust-title {
+      text-align: center;
+      font-size: 14px;
+      color: #94a3b8;
+      margin-bottom: 30px;
+      font-weight: 500;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .trust-logos {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .trust-logo {
+      font-size: 24px;
+      color: #64748b;
+      font-weight: 600;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .trust-logo:hover {
+      opacity: 1;
+    }
+
+    footer {
+      margin-top: 80px;
+      background: rgba(2, 6, 23, 0.8);
+      backdrop-filter: blur(20px);
+      color: #cbd5e1;
+      padding: 32px 40px;
+      font-size: 13px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .footer-inner {
+      max-width: 1100px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .footer-inner a {
+      color: #93c5fd;
+      text-decoration: none;
+      margin-left: 12px;
+      transition: color 0.2s ease;
+    }
+
+    .footer-inner a:hover { 
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    .footer-inner .center { opacity: 0.7; }
+
+    @media (max-width: 768px) {
+      header h1 { font-size: 36px; }
+      header p { font-size: 16px; }
+      .stats { gap: 20px; }
+      .stat-num { font-size: 24px; }
+      .input-wrapper { flex-direction: column; }
+      button { width: 100%; }
+      .trust-logos { gap: 30px; }
+      .footer-inner { flex-direction: column; text-align: center; }
+      .footer-inner a { margin: 0 8px; }
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="shield-icon">🛡️</div>
+  <h1>PhishGuard AI</h1>
+  <p>Enterprise-grade phishing & malicious URL detection powered by AI</p>
+  
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num">2.4M+</span>
+      <span class="stat-label">URLs Scanned</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">99.7%</span>
+      <span class="stat-label">Accuracy Rate</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">Real-time Protection</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="search-card">
+    <div class="input-wrapper">
+      <input id="url" placeholder="Enter or paste URL to analyze (e.g., https://example.com)" autocomplete="off">
+      <button id="scanBtn" onclick="scan()">🔍 Scan URL</button>
+    </div>
+    <div class="hint">💡 Supports HTTP, HTTPS, and suspicious shortened URLs</div>
+    
+    <div class="examples">
+      <strong style="font-size: 12px; color: #64748b; margin-right: 8px;">Try examples:</strong>
+      <span class="example-chip" onclick="tryExample('https://google.com')">google.com</span>
+      <span class="example-chip" onclick="tryExample('http://suspicious-site-login.xyz')">suspicious-site-login.xyz</span>
+      <span class="example-chip" onclick="tryExample('https://paypal-verify-account.com')">paypal-verify-account.com</span>
+    </div>
+  </div>
+
+  <div id="result" class="result"></div>
+</div>
+
+<div class="trust-section">
+  <div class="trust-title">Trusted by Leading Organizations</div>
+  <div class="trust-logos">
+    <div class="trust-logo">TechCorp</div>
+    <div class="trust-logo">SecureBank</div>
+    <div class="trust-logo">GlobalHealth</div>
+    <div class="trust-logo">DataSystems</div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="left">
+      © <span id="year"></span> <strong>PhishGuard AI</strong>. All rights reserved.
+    </div>
+    <div class="center">Protecting enterprises from phishing threats worldwide</div>
+    <div class="right">
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+      <a href="#">API Docs</a>
+      <a href="#">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("year").innerText = new Date().getFullYear();
+
+  // Press Enter to scan
+  document.getElementById("url").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") scan();
+  });
+
+  function tryExample(url) {
+    document.getElementById("url").value = url;
+    document.getElementById("url").focus();
+  }
+
+  function validateURL(url) {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  async function scan() {
+    const input = document.getElementById("url");
+    const btn = document.getElementById("scanBtn");
+    let url = input.value.trim();
+    const resultDiv = document.getElementById("result");
+
+    // Add https:// if missing
+    if (url && !url.match(/^https?:\/\//i)) {
+      url = 'https://' + url;
+      input.value = url;
+    }
+
+    if (!url) {
+      input.classList.add('error');
+      setTimeout(() => input.classList.remove('error'), 2000);
+      return;
+    }
+
+    if (!validateURL(url)) {
+      input.classList.add('error');
+      resultDiv.innerHTML = `<p style="color:#ef4444; text-align:center; padding:20px;">❌ Invalid URL format. Please enter a valid URL.</p>`;
+      setTimeout(() => input.classList.remove('error'), 2000);
+      return;
+    }
+
+    input.classList.remove('error');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Scanning...';
+    
+    resultDiv.innerHTML = `
+      <div class="loading">
+        <div class="loading-icon">🔍</div>
+        <div style="font-size:16px; font-weight:600; color:#1e293b;">Analyzing URL risk profile...</div>
+        <div style="font-size:13px; color:#64748b; margin-top:8px;">Checking against threat databases, patterns, and AI models</div>
+      </div>
+    `;
+
+    try {
+      const res = await fetch("/api/scan", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        resultDiv.innerHTML = `<p style="color:#dc2626; text-align:center; padding:40px; background:rgba(255,255,255,0.95); border-radius:16px;">❌ Scan failed (${res.status}). ${errText}</p>`;
+        return;
+      }
+
+      const data = await res.json();
+      const verdict = (data.verdict || "SAFE").toLowerCase();
+      const score = Math.min(Number(data.risk_score || 0), 100);
+
+      const verdictIcons = {
+        safe: '✅',
+        suspicious: '⚠️',
+        phishing: '🚨'
+      };
+
+      resultDiv.innerHTML = `
+        <div class="result-card ${verdict}">
+          <div class="verdict-header">
+            <span class="verdict-icon">${verdictIcons[verdict]}</span>
+            <div>
+              <div class="verdict ${verdict}">${data.verdict}</div>
+              <div class="sub">AI-powered risk assessment completed</div>
+            </div>
+          </div>
+          
+          <div class="meta"><strong>🔗 Analyzed URL:</strong> ${data.url}</div>
+
+          <div class="score-wrap">
+            <div class="score-text">Risk Score: <strong>${data.risk_score} / 100</strong></div>
+            <div class="bar">
+              <div class="fill ${verdict}" style="width:${score}%"></div>
+            </div>
+            <div class="score-labels">
+              <span>0 - Safe</span>
+              <span>50 - Moderate</span>
+              <span>100 - Dangerous</span>
+            </div>
+          </div>
+
+          <h4>🎯 Detection Factors</h4>
+          <ul>
+            ${(data.reasons || []).slice(0,6).map(r => `<li>${r}</li>`).join("")}
+          </ul>
+
+          <div class="actions">
+            <button class="action-btn" onclick="shareReport()">📤 Share Report</button>
+            <button class="action-btn" onclick="scan()">🔄 Scan Another URL</button>
+            <button class="action-btn" onclick="copyReport()">📋 Copy Details</button>
+          </div>
+        </div>
+      `;
+    } catch (err) {
+      resultDiv.innerHTML = `<p style="color:#dc2626; text-align:center; padding:40px; background:rgba(255,255,255,0.95); border-radius:16px;">❌ Network error. Please check your connection and try again.</p>`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '🔍 Scan URL';
+    }
+  }
+
+  function shareReport() {
+    if (navigator.share) {
+      navigator.share({
+        title: 'PhishGuard AI Scan Report',
+        text: 'Check out this URL security scan from PhishGuard AI',
+        url: window.location.href
+      }).catch(() => {});
+    } else {
+      alert('📤 Share functionality - copy this page URL to share the report');
+    }
+  }
+
+  function copyReport() {
+    const resultCard = document.querySelector('.result-card');
+    if (resultCard) {
+      const text = resultCard.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('✅ Report copied to clipboard!');
+      }).catch(() => {
+        alert('❌ Failed to copy. Please try manually.');
+      });
+    }
+  }
+</script>
+</body>
+</html>
